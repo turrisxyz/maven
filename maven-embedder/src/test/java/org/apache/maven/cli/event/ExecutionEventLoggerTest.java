@@ -29,6 +29,7 @@ import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.logging.MessageUtils;
+import org.codehaus.plexus.util.Os;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -83,7 +84,7 @@ public class ExecutionEventLoggerTest
         inOrder.verify( logger ).info( "" );
         inOrder.verify( logger ).info( "------------------< org.apache.maven:maven-embedder >-------------------" );
         inOrder.verify( logger ).info( "Building Apache Maven Embedder 3.5.4-SNAPSHOT" );
-        inOrder.verify( logger ).info( "    maven-embedder/pom.xml" );
+        inOrder.verify( logger ).info( adaptDirSeparator( "    from maven-embedder/pom.xml" ) );
         inOrder.verify( logger ).info( "--------------------------------[ jar ]---------------------------------" );
     }
 
@@ -118,7 +119,16 @@ public class ExecutionEventLoggerTest
         inOrder.verify( logger ).info( "" );
         inOrder.verify( logger ).info( "--< org.apache.maven.plugins.overflow:maven-project-info-reports-plugin >--" );
         inOrder.verify( logger ).info( "Building Apache Maven Project Info Reports Plugin 3.0.0-SNAPSHOT" );
-        inOrder.verify( logger ).info( "    pom.xml" );
+        inOrder.verify( logger ).info( "    from pom.xml" );
         inOrder.verify( logger ).info( "----------------------------[ maven-plugin ]----------------------------" );
+    }
+
+    private static String adaptDirSeparator( String path )
+    {
+        if ( Os.isFamily( Os.FAMILY_WINDOWS ) )
+        {
+            return path.replace( '/', '\\' );
+        }
+        return path;
     }
 }
