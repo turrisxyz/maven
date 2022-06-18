@@ -23,7 +23,10 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+
 import org.apache.maven.execution.ExecutionEvent;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.junit.AfterClass;
@@ -63,7 +66,14 @@ public class ExecutionEventLoggerTest
         when( project.getPackaging() ).thenReturn( "jar" );
         when( project.getName() ).thenReturn( "Apache Maven Embedder" );
         when( project.getVersion() ).thenReturn( "3.5.4-SNAPSHOT" );
+        when( project.getFile() ).thenReturn( new File( "maven-embedder/pom.xml" ) );
         when( event.getProject() ).thenReturn( project );
+
+        MavenProject rootProject = mock( MavenProject.class );
+        when( rootProject.getBasedir() ).thenReturn( new File( "" ) );
+        MavenSession session = mock( MavenSession.class );
+        when( session.getTopLevelProject() ).thenReturn( rootProject );
+        when( event.getSession() ).thenReturn( session );
 
         // execute
         executionEventLogger.projectStarted( event );
@@ -73,6 +83,7 @@ public class ExecutionEventLoggerTest
         inOrder.verify( logger ).info( "" );
         inOrder.verify( logger ).info( "------------------< org.apache.maven:maven-embedder >-------------------" );
         inOrder.verify( logger ).info( "Building Apache Maven Embedder 3.5.4-SNAPSHOT" );
+        inOrder.verify( logger ).info( "    maven-embedder/pom.xml" );
         inOrder.verify( logger ).info( "--------------------------------[ jar ]---------------------------------" );
     }
 
@@ -92,6 +103,12 @@ public class ExecutionEventLoggerTest
         when( project.getName() ).thenReturn( "Apache Maven Project Info Reports Plugin" );
         when( project.getVersion() ).thenReturn( "3.0.0-SNAPSHOT" );
         when( event.getProject() ).thenReturn( project );
+        when( project.getFile() ).thenReturn( new File( "pom.xml" ) );
+        when( project.getBasedir() ).thenReturn( new File( "" ) );
+
+        MavenSession session = mock( MavenSession.class );
+        when( session.getTopLevelProject() ).thenReturn( project );
+        when( event.getSession() ).thenReturn( session );
 
         // execute
         executionEventLogger.projectStarted( event );
@@ -101,6 +118,7 @@ public class ExecutionEventLoggerTest
         inOrder.verify( logger ).info( "" );
         inOrder.verify( logger ).info( "--< org.apache.maven.plugins.overflow:maven-project-info-reports-plugin >--" );
         inOrder.verify( logger ).info( "Building Apache Maven Project Info Reports Plugin 3.0.0-SNAPSHOT" );
+        inOrder.verify( logger ).info( "    pom.xml" );
         inOrder.verify( logger ).info( "----------------------------[ maven-plugin ]----------------------------" );
     }
 }
