@@ -25,11 +25,11 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.logging.MessageUtils;
-import org.codehaus.plexus.util.Os;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -60,6 +60,7 @@ public class ExecutionEventLoggerTest
         when( logger.isInfoEnabled() ).thenReturn( true );
         executionEventLogger = new ExecutionEventLogger( logger );
 
+        File basedir = new File( "" ).getAbsoluteFile();
         ExecutionEvent event = mock( ExecutionEvent.class );
         MavenProject project = mock( MavenProject.class );
         when( project.getGroupId() ).thenReturn( "org.apache.maven" );
@@ -67,11 +68,11 @@ public class ExecutionEventLoggerTest
         when( project.getPackaging() ).thenReturn( "jar" );
         when( project.getName() ).thenReturn( "Apache Maven Embedder" );
         when( project.getVersion() ).thenReturn( "3.5.4-SNAPSHOT" );
-        when( project.getFile() ).thenReturn( new File( "maven-embedder/pom.xml" ) );
+        when( project.getFile() ).thenReturn( new File( basedir, "maven-embedder/pom.xml" ) );
         when( event.getProject() ).thenReturn( project );
 
         MavenProject rootProject = mock( MavenProject.class );
-        when( rootProject.getBasedir() ).thenReturn( new File( "" ) );
+        when( rootProject.getBasedir() ).thenReturn( basedir );
         MavenSession session = mock( MavenSession.class );
         when( session.getTopLevelProject() ).thenReturn( rootProject );
         when( event.getSession() ).thenReturn( session );
@@ -96,6 +97,7 @@ public class ExecutionEventLoggerTest
         when( logger.isInfoEnabled() ).thenReturn( true );
         executionEventLogger = new ExecutionEventLogger( logger );
 
+        File basedir = new File( "" ).getAbsoluteFile();
         ExecutionEvent event = mock( ExecutionEvent.class );
         MavenProject project = mock( MavenProject.class );
         when( project.getGroupId() ).thenReturn( "org.apache.maven.plugins.overflow" );
@@ -104,8 +106,8 @@ public class ExecutionEventLoggerTest
         when( project.getName() ).thenReturn( "Apache Maven Project Info Reports Plugin" );
         when( project.getVersion() ).thenReturn( "3.0.0-SNAPSHOT" );
         when( event.getProject() ).thenReturn( project );
-        when( project.getFile() ).thenReturn( new File( "pom.xml" ) );
-        when( project.getBasedir() ).thenReturn( new File( "" ) );
+        when( project.getFile() ).thenReturn( new File( basedir, "pom.xml" ) );
+        when( project.getBasedir() ).thenReturn( basedir );
 
         MavenSession session = mock( MavenSession.class );
         when( session.getTopLevelProject() ).thenReturn( project );
@@ -119,16 +121,12 @@ public class ExecutionEventLoggerTest
         inOrder.verify( logger ).info( "" );
         inOrder.verify( logger ).info( "--< org.apache.maven.plugins.overflow:maven-project-info-reports-plugin >--" );
         inOrder.verify( logger ).info( "Building Apache Maven Project Info Reports Plugin 3.0.0-SNAPSHOT" );
-        inOrder.verify( logger ).info( "  from pom.xml" );
+        inOrder.verify( logger ).info( adaptDirSeparator( "  from pom.xml" ) );
         inOrder.verify( logger ).info( "----------------------------[ maven-plugin ]----------------------------" );
     }
 
     private static String adaptDirSeparator( String path )
     {
-        if ( Os.isFamily( Os.FAMILY_WINDOWS ) )
-        {
-            return path.replace( '/', '\\' );
-        }
-        return path;
+        return FilenameUtils.separatorsToSystem( path );
     }
 }
