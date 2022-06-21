@@ -338,7 +338,7 @@ public class ExecutionEventLogger
             MavenSession session = event.getSession();
             File rootBasedir = session.getTopLevelProject().getBasedir();
             File currentPom = project.getFile();
-            logger.info( "    from " + rootBasedir.toPath().relativize( currentPom.toPath() ) );
+            logger.info( "  from " + rootBasedir.toPath().relativize( currentPom.toPath() ) );
 
             // ----------[ packaging ]----------
             prefix = chars( '-', Math.max( 0, ( LINE_LENGTH - project.getPackaging().length() - 4 ) / 2 ) );
